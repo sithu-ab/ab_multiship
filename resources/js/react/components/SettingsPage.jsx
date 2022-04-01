@@ -1,4 +1,4 @@
-import {React, useState} from "react";
+import {React, useEffect, useState} from "react";
 import {Card, Page, Button, Stack} from '@shopify/polaris';
 import axios from "axios";
 
@@ -7,6 +7,15 @@ function SettingsPage(props) {
     const {shopOrigin, appDomain} = props.config;
 
     console.log(props.config);
+
+    useEffect(() => {
+        console.log('SettingsPage component mounted!');
+        axios.get(`${appDomain}/api/app/settings?shop=${shopOrigin}`)
+            .then(res => {
+                console.log(res.data)
+                setEnabled(res.data.enabled)
+            })
+    });
 
     const enableDisableApp = () => {
         let mode = enabled ? 'disable' : 'enable';

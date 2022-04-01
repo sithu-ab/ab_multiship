@@ -18,4 +18,5 @@ Route::get('/', function () {
     return "Hello API";
 });
 
+Route::get('/app/settings', [AppController::class, 'settings']);
 Route::post('/app/{mode}', [AppController::class, 'index'])->where(['mode' => '(enable|disable)']);

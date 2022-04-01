@@ -94,6 +94,13 @@ class AppController extends Controller
         return response(['enabled' => $setting->enabled]);
     }
 
+    public function settings()
+    {
+        $setting = Setting::firstOrNew(['id' => 1]);
+
+        return response($setting);
+    }
+
     /**
      * Get Rest Client
      * @param string $shop
