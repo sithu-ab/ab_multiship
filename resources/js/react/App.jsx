@@ -9,6 +9,7 @@ import translations from "@shopify/polaris/locales/en.json";
 import '@shopify/polaris/dist/styles.css';
 import PageLayout from "./components/PageLayout";
 import ProductsPage from "./components/ProductsPage";
+import SettingsPage from "./components/SettingsPage";
 import {Provider, useAppBridge} from '@shopify/app-bridge-react';
 import {BrowserRouter, Route, Switch} from "react-router-dom";
 import ClientRouter from "./components/ClientRouter";
@@ -53,8 +54,9 @@ function AppBridgeApolloProvider({children}) {
 function ExamplePage() {
     return <div>Example Page</div>
 }
-function App({shop, host, apiKey}) {
-    const config = {apiKey: apiKey, shopOrigin: shop, host: host, forceRedirect: true};
+
+function App({shop, host, apiKey, domain}) {
+    const config = {apiKey: apiKey, shopOrigin: shop, host: host, appDomain: domain, forceRedirect: true};
 
     return (
         <BrowserRouter>
@@ -66,7 +68,8 @@ function App({shop, host, apiKey}) {
                         <PageLayout>
                             <Switch>
                                 <Route path="/example" component={ExamplePage}/>
-                                <Route path="/" component={ProductsPage}/>
+                                <Route path="/products" component={ProductsPage}/>
+                                <Route path="/" render={(props) => <SettingsPage config={config} {...props} />}/>
                             </Switch>
                         </PageLayout>
                     </AppBridgeApolloProvider>

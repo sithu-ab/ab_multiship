@@ -13,17 +13,26 @@ function AppNavigation() {
         destination: '/',
     });
 
+    const product = AppLink.create(app, {
+        label: 'Products',
+        destination: '/products',
+    });
+
     const example = AppLink.create(app, {
         label: 'Example',
         destination: '/example',
     });
+
     const navigationMenu = NavigationMenu.create(app, {
-        items: [home, example],
+        items: [home, product, example],
     });
 
     switch (location.pathname) {
         case "/":
             navigationMenu.set({active: home});
+            break;
+        case "/products":
+            navigationMenu.set({active: product});
             break;
         case "/example":
             navigationMenu.set({active: example});

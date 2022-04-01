@@ -33,7 +33,8 @@ Route::fallback(function (Request $request) {
         return view('react', [
             'shop' => $shop,
             'host' => $host,
-            'apiKey' => Context::$API_KEY
+            'apiKey' => Context::$API_KEY,
+            'appDomain' => env('HOST'),
         ]);
     }
     return redirect("/login?shop=$shop");
