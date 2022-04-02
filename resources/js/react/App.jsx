@@ -64,11 +64,8 @@ function App({shop, host, apiKey, domain}) {
                 <ClientRouter/>
                 <AppProvider i18n={translations}>
                     <AppBridgeApolloProvider>
-                        <AppNavigation/>
                         <PageLayout>
                             <Switch>
-                                <Route path="/example" component={ExamplePage}/>
-                                <Route path="/products" component={ProductsPage}/>
                                 <Route path="/" render={(props) => <SettingsPage config={config} {...props} />}/>
                             </Switch>
                         </PageLayout>
