@@ -30,12 +30,7 @@ function SettingsPage(props) {
     return (
         <Page title="AB Multiship">
             <Card sectioned title="Shipping to Multiple Addresses">
-                <Stack alignment="center">
-                    <Stack.Item fill>
-                        <p>Configure your multiple shipping address checkout flow</p>
-                    </Stack.Item>
-                    <Button primary onClick={enableDisableApp}>{ enabled ? 'Disable' : 'Enable'}</Button>
-                </Stack>
+                <Button primary onClick={enableDisableApp}>{ enabled ? 'Disable' : 'Enable'}</Button>
             </Card>
         </Page>
     )
