@@ -28,7 +28,7 @@ class AppController extends Controller
         if ($mode == 'enable') {
             $error  = false;
             $shop   = $request->get('shop');
-            $file   = resource_path() . '/liquid/ab-multiship.liquid';
+            $file   = resource_path() . '/themes/dawn/templates/ab-multiship.liquid';
             $client = $this->getClient($shop);
 
             // Insert/Update snippets/ab-multiship.liquid into the theme
@@ -103,12 +103,14 @@ class AppController extends Controller
 
     /**
      * Get Rest Client
-     * @param string $shop
+     * @param string|null $shop
      * @return Rest
      * @throws \Shopify\Exception\MissingArgumentException
      */
-    private function getClient(string $shop): Rest
+    private function getClient(string $shop = null): Rest
     {
+        $shop = $shop ?: config('shopify.shop');
+
         $session = Session::where('shop', $shop)
             ->where('is_online', true)
             ->whereNotNull('user_id')
