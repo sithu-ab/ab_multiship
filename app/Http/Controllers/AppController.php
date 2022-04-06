@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Session;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Shopify\Clients\Rest;
 
 class AppController extends Controller
@@ -109,7 +110,7 @@ class AppController extends Controller
      */
     private function getClient(string $shop = null): Rest
     {
-        $shop = $shop ?: config('shopify.shop');
+        $shop = $shop ?: Config::get('shopify.shop');
 
         $session = Session::where('shop', $shop)
             ->where('is_online', true)

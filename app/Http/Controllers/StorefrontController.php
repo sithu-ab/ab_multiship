@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Session;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Shopify\Clients\Rest;
 use Shopify\Clients\Storefront;
 
@@ -11,16 +12,12 @@ class StorefrontController extends Controller
 {
     /**
      * @param Request $request
-     * @return void
      * @throws \Shopify\Exception\HttpRequestException
      * @throws \Shopify\Exception\MissingArgumentException
      */
     public function products(Request $request)
     {
-        // header('Access-Control-Allow-Origin: *');
-        // header('Access-Control-Allow-Origin: https://' . config('shopify.shop'));
-
-        $shop = $request->get('shop', config('shopify.shop'));
+        $shop = $request->get('shop', Config::get('shopify.shop'));
 
         // The Storefront client takes in the shop url and the Storefront Access Token for that shop.
         $storefrontClient = new Storefront($shop, config('shopify.storefront_token'));
@@ -41,7 +38,7 @@ class StorefrontController extends Controller
             QUERY,
         );
 
-        dd($products->getDecodedBody());
+        return response($products->getDecodedBody()['data']['products']['edges']);
     }
 
     private function getStorefrontAccessToken()
@@ -74,7 +71,7 @@ class StorefrontController extends Controller
      */
     private function getClient(string $shop = null): Rest
     {
-        $shop = $shop ?: config('shopify.shop');
+        $shop = $shop ?: Config::get('shopify.shop');
 
         $session = Session::where('shop', $shop)
             ->where('is_online', true)
