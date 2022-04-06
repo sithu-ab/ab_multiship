@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Lib\DbSessionStorage;
 use App\Lib\Handlers\AppUninstalled;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Shopify\Context;
@@ -31,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Schema::defaultStringLength(191);
+
         Context::initialize(
             Config::get('shopify.api_key'),
             Config::get('shopify.api_secret'),
