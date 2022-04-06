@@ -19,7 +19,7 @@ Route::get('/', function () {
     return "Hello API";
 });
 
-Route::get('/app/settings', [AppController::class, 'settings'])->middleware('cors');
-Route::post('/app/{mode}', [AppController::class, 'index'])->where(['mode' => '(enable|disable)'])->middleware('cors');
+Route::get('/app/settings', [AppController::class, 'settings']);
+Route::post('/app/{mode}', [AppController::class, 'index'])->where(['mode' => '(enable|disable)']);
 
-Route::get('/storefront/products', [StorefrontController::class, 'products'])->middleware('cors');
+Route::get('/storefront/products', [StorefrontController::class, 'products']);
