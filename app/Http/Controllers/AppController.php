@@ -10,8 +10,6 @@ use Shopify\Clients\Rest;
 
 class AppController extends Controller
 {
-    private const THEME_ID = 123985330233;
-
     /**
      * Enable/Disable app
      *
@@ -24,6 +22,7 @@ class AppController extends Controller
      */
     public function index(string $mode, Request $request)
     {
+        $themeId = Config::get('shopify.theme_id');
         $setting = Setting::firstOrNew(['id' => 1]);
 
         if ($mode == 'enable') {
@@ -34,7 +33,7 @@ class AppController extends Controller
 
             // Insert/Update snippets/ab-multiship.liquid into the theme
             $response = $client->put(
-                'themes/' . self::THEME_ID . '/assets',
+                'themes/' . Config::get('shopify.theme_id') . '/assets',
                 [
                     'asset' => [
                         'key' => 'snippets/ab-multiship.liquid',
@@ -45,7 +44,7 @@ class AppController extends Controller
 
             if ($response->getStatusCode() == 200) {
                 // Get layout/theme.liquid content
-                $response = $client->get('themes/' . self::THEME_ID . '/assets', [], [
+                $response = $client->get('themes/' . $themeId . '/assets', [], [
                     'asset[key]' => 'layout/theme.liquid',
                 ]);
 
@@ -60,7 +59,7 @@ class AppController extends Controller
                         $html = $html[0] . PHP_EOL . '    ' . $snippet . PHP_EOL . '</head>' . $html[1];
 
                         $res = $client->put(
-                            'themes/' . self::THEME_ID . '/assets',
+                            'themes/' . $themeId . '/assets',
                             [
                                 'asset' => [
                                     'key' => 'layout/theme.liquid',

@@ -6,5 +6,6 @@ return [
     'scopes' => env('SCOPES', ['']),
     'host' => env('HOST', ''),
     'shop' => env('SHOP'),
-    'storefront_token' => env('STOREFRONT_TOKEN'),
+    'storefront_token' => env('STOREFRONT_TOKEN', ''),
+    'theme_id' => env('SHOPIFY_THEME_ID', ''),
 ];
