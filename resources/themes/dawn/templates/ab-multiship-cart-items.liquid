@@ -1,0 +1,16 @@
+<tr id="abms-item-{{ item.index }}">
+    <td colspan="5" class="abms-cart-pt-0">
+        <div class="abms-cart-address" data-index="{{ item.index }}">
+            <input type="hidden" class="abms-variant-id" value="{{  item.variant_id }}" />
+            <input type="number" class="abms-input abms-w-70 abms-qty" value="1" />
+            <select class="abms-input abms-cart-select-address abms-address">
+                <option value="">Select from the saved address</option>
+            </select>
+            <a href="#" class="abms-cart-address-create">or add new address</a>
+            <a href="#" class="abms-cart-address-remove">x</a>
+        </div>
+        <div class="abms-cart-more-address" data-index="{{ item.index }}">
+            <a href="#">+ Add another address to ship</a>
+        </div>
+    </td>
+</tr>

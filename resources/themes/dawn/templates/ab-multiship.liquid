@@ -1,6 +1,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script> -->
 
 <script defer>
     /**
@@ -15,6 +13,41 @@
 
     AB.shopifyCart = {};
     AB.cart = {};
+    AB.multishipping = false;
+    AB.addresses = [ // TODO:// This should be rendered from db
+        {
+            "id": 1,
+            "first_name": "Rika",
+            "last_name": "Kano",
+            "address": "2 Chome-1-1 Honcho",
+            "address2": "",
+            "city": "我孫子市",
+            "province": "Hyōgo",
+            "country": "Japan",
+            "zip": "270-1151",
+            "phone": "04-7183-6781",
+            "province_code": "JP-28",
+            "country_code": "JP",
+            "complete": "Rika Kano, 2 Chome-1-1 Honcho, 我孫子市, Hyōgo, Japan, 270-1151, 04-7183-6781",
+            "display": "Rika Kano, 2 Chome-1-1 Honcho, 我孫子市, 兵庫県, 日本, 270-1151, 04-7183-6781"
+        },
+        {
+            "id": 2,
+            "first_name": "Momoko ",
+            "last_name": "Matsumoto",
+            "address": "Rokutan-24-2 Shimohasumicho",
+            "address2": "",
+            "city": "西尾市",
+            "province": "Kagoshima",
+            "country": "Japan",
+            "zip": "445-0004",
+            "phone": "0563-52-2939",
+            "province_code": "JP-46",
+            "country_code": "JP",
+            "complete": "Momoko Matsumoto, Rokutan-24-2 Shimohasumicho, 西尾市, Kagoshima, Japan, 445-0004, 0563-52-2939",
+            "display": "Momoko Matsumoto, Rokutan-24-2 Shimohasumicho, 西尾市, 鹿児島県, 日本, 445-0004, 0563-52-2939"
+        }
+    ];
 </script>
 
 {% if template.name == 'cart' %}
@@ -23,4 +56,5 @@
         AB.shopifyCart = {{ cart | json }}
     </script>
     <script src="{{ 'ab-multiship.js' | asset_url }}" defer></script>
+    <script src="{{ 'ab-multiship-cart-dialog.js' | asset_url }}" defer></script>
 {% endif %}
