@@ -11,6 +11,17 @@ use Shopify\Clients\Rest;
 class AppController extends Controller
 {
     /**
+     * Get app setting
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function settings()
+    {
+        $setting = Setting::firstOrNew(['id' => 1]);
+
+        return response($setting);
+    }
+
+    /**
      * Enable/Disable app
      *
      * @route POST /api/app/(enable|disable)
@@ -94,11 +105,24 @@ class AppController extends Controller
         return response(['enabled' => $setting->enabled]);
     }
 
-    public function settings()
+    /**
+     * Retrieves a checkout
+     * @param string $token
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
+     */
+    public function checkout(string $token, Request $request)
     {
-        $setting = Setting::firstOrNew(['id' => 1]);
+        $shop   = $request->get('shop', Config::get('shopify.shop'));
+        $client = $this->getClient($shop);
 
-        return response($setting);
+        $response = $client->get('checkouts/' . $token . '.json');
+
+        return response($response->getDecodedBody());
     }
 
     /**
