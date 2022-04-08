@@ -22,6 +22,7 @@ Route::get('/', function () {
 Route::get('/app/settings', [AppController::class, 'settings']);
 Route::post('/app/{mode}', [AppController::class, 'index'])->where(['mode' => '(enable|disable)']);
 Route::get('/app/checkout/{token}', [AppController::class, 'checkout']);
+Route::get('/app/checkout/{token}/shipping-rates', [AppController::class, 'checkoutShippingRates']);
 Route::get('/app/shipping-zones', [AppController::class, 'shippingZones']);
 
 Route::get('/storefront/products', [StorefrontController::class, 'products']);

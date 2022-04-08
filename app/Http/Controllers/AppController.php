@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Shopify\Clients\Rest;
+use Shopify\Rest\Admin2022_04\Checkout;
 
 class AppController extends Controller
 {
@@ -107,6 +108,8 @@ class AppController extends Controller
 
     /**
      * Retrieves a checkout
+     * https://shopify.dev/api/admin-rest/2022-04/resources/checkout#get-checkouts-token
+     *
      * @param string $token
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
@@ -126,6 +129,22 @@ class AppController extends Controller
     }
 
     /**
+     * Retrieves a list of available shipping rates for the specified checkout
+     * https://shopify.dev/api/admin-rest/2022-04/resources/checkout#get-checkouts-token-shipping-rates
+     *
+     * @param string $token
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function checkoutShippingRates(string $token, Request $request)
+    {
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $result = Checkout::shipping_rates($this->getSession($shop), $token);
+
+        return response($result);
+    }
+
+    /**
      * Retrieves shipping zones
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
@@ -133,6 +152,15 @@ class AppController extends Controller
      * @throws \Psr\Http\Client\ClientExceptionInterface
      * @throws \Shopify\Exception\MissingArgumentException
      * @throws \Shopify\Exception\UninitializedContextException
+     */
+
+    /**
+     * Retrieves shipping zones
+     * https://shopify.dev/api/admin-rest/2022-04/resources/shippingzone#get-shipping-zones
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
      */
     public function shippingZones(Request $request)
     {
@@ -142,6 +170,10 @@ class AppController extends Controller
         $response = $client->get('shipping_zones.json');
 
         return response($response->getDecodedBody());
+
+        // Error: Current Context::$API_VERSION 'unstable' does not match resource version '2022-04'
+        // $result = ShippingZone::all($this->getSession($shop));
+        // return response($result);
     }
 
     /**
@@ -161,5 +193,30 @@ class AppController extends Controller
             ->first();
 
         return new Rest($session->shop, $session->access_token);
+    }
+
+    /**
+     * Get shopify auth session
+     * @param string|null $shop
+     * @return \Shopify\Auth\Session
+     * @throws \Exception
+     */
+    private function getSession(string $shop = null)
+    {
+        $shop = $shop ?: Config::get('shopify.shop');
+
+        $sess = Session::where('shop', $shop)
+            ->where('is_online', true)
+            ->whereNotNull('user_id')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $auth = new \Shopify\Auth\Session($sess->session_id, $sess->shop, $sess->is_online, $sess->state);
+
+        $auth->setAccessToken($sess->access_token);
+        $auth->setScope($sess->scope);
+        $auth->setExpires($sess->expires_at);
+
+        return $auth;
     }
 }
