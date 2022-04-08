@@ -126,6 +126,25 @@ class AppController extends Controller
     }
 
     /**
+     * Retrieves shipping zones
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
+     */
+    public function shippingZones(Request $request)
+    {
+        $shop   = $request->get('shop', Config::get('shopify.shop'));
+        $client = $this->getClient($shop);
+
+        $response = $client->get('shipping_zones.json');
+
+        return response($response->getDecodedBody());
+    }
+
+    /**
      * Get Rest Client
      * @param string|null $shop
      * @return Rest
