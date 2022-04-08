@@ -135,6 +135,7 @@ class AppController extends Controller
      * @param string $token
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
      */
     public function checkoutShippingRates(string $token, Request $request)
     {
@@ -146,21 +147,14 @@ class AppController extends Controller
 
     /**
      * Retrieves shipping zones
+     * https://shopify.dev/api/admin-rest/2022-04/resources/shippingzone#get-shipping-zones
+     *
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      * @throws \JsonException
      * @throws \Psr\Http\Client\ClientExceptionInterface
      * @throws \Shopify\Exception\MissingArgumentException
      * @throws \Shopify\Exception\UninitializedContextException
-     */
-
-    /**
-     * Retrieves shipping zones
-     * https://shopify.dev/api/admin-rest/2022-04/resources/shippingzone#get-shipping-zones
-     *
-     * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
-     * @throws \Exception
      */
     public function shippingZones(Request $request)
     {
@@ -201,7 +195,7 @@ class AppController extends Controller
      * @return \Shopify\Auth\Session
      * @throws \Exception
      */
-    private function getSession(string $shop = null)
+    private function getSession(string $shop = null): \Shopify\Auth\Session
     {
         $shop = $shop ?: Config::get('shopify.shop');
 
