@@ -39,7 +39,8 @@ class AppServiceProvider extends ServiceProvider
             Config::get('shopify.api_secret'),
             Config::get('shopify.scopes'),
             str_replace('https://', '', Config::get('shopify.host')),
-            new DbSessionStorage()
+            new DbSessionStorage(),
+            Config::get('shopify.api_version')
         );
 
         URL::forceScheme('https');
