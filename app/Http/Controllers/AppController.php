@@ -4,12 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Session;
 use App\Models\Setting;
+use App\Models\Shopify\Checkout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Shopify\Clients\Rest;
+use Shopify\Rest\Admin2022_04\ShippingZone;
 
 class AppController extends Controller
 {
-    private const THEME_ID = 123985330233;
+    /**
+     * Get app setting
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function settings()
+    {
+        $setting = Setting::firstOrNew(['id' => 1]);
+
+        return response($setting);
+    }
 
     /**
      * Enable/Disable app
@@ -23,17 +35,18 @@ class AppController extends Controller
      */
     public function index(string $mode, Request $request)
     {
+        $themeId = Config::get('shopify.theme_id');
         $setting = Setting::firstOrNew(['id' => 1]);
 
         if ($mode == 'enable') {
             $error  = false;
             $shop   = $request->get('shop');
-            $file   = resource_path() . '/liquid/ab-multiship.liquid';
+            $file   = resource_path() . '/themes/dawn/templates/ab-multiship.liquid';
             $client = $this->getClient($shop);
 
             // Insert/Update snippets/ab-multiship.liquid into the theme
             $response = $client->put(
-                'themes/' . self::THEME_ID . '/assets',
+                'themes/' . Config::get('shopify.theme_id') . '/assets',
                 [
                     'asset' => [
                         'key' => 'snippets/ab-multiship.liquid',
@@ -44,7 +57,7 @@ class AppController extends Controller
 
             if ($response->getStatusCode() == 200) {
                 // Get layout/theme.liquid content
-                $response = $client->get('themes/' . self::THEME_ID . '/assets', [], [
+                $response = $client->get('themes/' . $themeId . '/assets', [], [
                     'asset[key]' => 'layout/theme.liquid',
                 ]);
 
@@ -59,7 +72,7 @@ class AppController extends Controller
                         $html = $html[0] . PHP_EOL . '    ' . $snippet . PHP_EOL . '</head>' . $html[1];
 
                         $res = $client->put(
-                            'themes/' . self::THEME_ID . '/assets',
+                            'themes/' . $themeId . '/assets',
                             [
                                 'asset' => [
                                     'key' => 'layout/theme.liquid',
@@ -94,21 +107,108 @@ class AppController extends Controller
         return response(['enabled' => $setting->enabled]);
     }
 
-    public function settings()
+    /**
+     * Create a checkout
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Shopify\Exception\RestResourceException
+     */
+    public function createCheckout(Request $request)
     {
-        $setting = Setting::firstOrNew(['id' => 1]);
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $data = $request->post();
 
-        return response($setting);
+        $checkout = new Checkout($this->getSession($shop));
+        $result = $checkout->insert($data);
+
+        return response($result);
+    }
+
+    /**
+     * Update a checkout
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Shopify\Exception\RestResourceException
+     */
+    public function updateCheckout(Request $request)
+    {
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $data = $request->post();
+
+        $checkout = new Checkout($this->getSession($shop), $data);
+        $checkout->save(true);
+
+        return response([
+            'token' => $checkout->token,
+            'web_url' => $checkout->web_url
+        ]);
+    }
+
+    /**
+     * Retrieves a checkout
+     * https://shopify.dev/api/admin-rest/2022-04/resources/checkout#get-checkouts-token
+     *
+     * @param string $token
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws \Shopify\Exception\MissingArgumentException
+     * @throws \Shopify\Exception\UninitializedContextException
+     */
+    public function getCheckout(string $token, Request $request)
+    {
+        $shop   = $request->get('shop', Config::get('shopify.shop'));
+        $client = $this->getClient($shop);
+
+        $response = $client->get('checkouts/' . $token . '.json');
+
+        return response($response->getDecodedBody());
+    }
+
+    /**
+     * Retrieves a list of available shipping rates for the specified checkout
+     * https://shopify.dev/api/admin-rest/2022-04/resources/checkout#get-checkouts-token-shipping-rates
+     *
+     * @param string $token
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function checkoutShippingRates(string $token, Request $request)
+    {
+        $shop   = $request->get('shop', Config::get('shopify.shop'));
+        $result = Checkout::shipping_rates($this->getSession($shop), $token);
+
+        return response($result);
+    }
+
+    /**
+     * Retrieves shipping zones
+     * https://shopify.dev/api/admin-rest/2022-04/resources/shippingzone#get-shipping-zones
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function shippingZones(Request $request)
+    {
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $result = ShippingZone::all($this->getSession($shop));
+
+        return response($result);
     }
 
     /**
      * Get Rest Client
-     * @param string $shop
+     * @param string|null $shop
      * @return Rest
      * @throws \Shopify\Exception\MissingArgumentException
      */
-    private function getClient(string $shop): Rest
+    private function getClient(string $shop = null): Rest
     {
+        $shop = $shop ?: Config::get('shopify.shop');
+
         $session = Session::where('shop', $shop)
             ->where('is_online', true)
             ->whereNotNull('user_id')
@@ -116,5 +216,30 @@ class AppController extends Controller
             ->first();
 
         return new Rest($session->shop, $session->access_token);
+    }
+
+    /**
+     * Get shopify auth session
+     * @param string|null $shop
+     * @return \Shopify\Auth\Session
+     * @throws \Exception
+     */
+    private function getSession(string $shop = null): \Shopify\Auth\Session
+    {
+        $shop = $shop ?: Config::get('shopify.shop');
+
+        $sess = Session::where('shop', $shop)
+            ->where('is_online', true)
+            ->whereNotNull('user_id')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $auth = new \Shopify\Auth\Session($sess->session_id, $sess->shop, $sess->is_online, $sess->state);
+
+        $auth->setAccessToken($sess->access_token);
+        $auth->setScope($sess->scope);
+        $auth->setExpires($sess->expires_at);
+
+        return $auth;
     }
 }

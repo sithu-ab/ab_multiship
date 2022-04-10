@@ -1,0 +1,57 @@
+.m-5 {
+    margin: 5px;
+}
+
+.my-5 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.p-5 {
+    padding: 5px;
+}
+
+.py-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.abms-cart-pt-0 {
+    padding-top: 0 !important;
+}
+
+.abms-cart-address,
+.abms-cart-address + .abms-cart-more-address {
+    display: none;
+}
+
+.abms-input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px #ddd solid;
+    margin: 2px;
+}
+
+.abms-w-70 {
+    width: 70px;
+}
+
+.abms-cart-select-address {
+    max-width: 230px;
+}
+
+.abms-cart-address-remove {
+    background: red;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50%;
+    padding: 0 10px;
+    font-weight: bold;
+    vertical-align: middle;
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.abms-cart-address:first-child .abms-cart-address-remove {
+    display: none;
+}
