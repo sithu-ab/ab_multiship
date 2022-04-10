@@ -15,12 +15,13 @@
     AB.shopifyCart = {};
     AB.cart = {};
     AB.multishipping = false;
+    AB.shippingZones = [];
     AB.addresses = [ // TODO:// This should be rendered from db
         {
             "id": 1,
             "first_name": "Rika",
             "last_name": "Kano",
-            "address": "2 Chome-1-1 Honcho",
+            "address1": "2 Chome-1-1 Honcho",
             "address2": "",
             "city": "我孫子市",
             "province": "Hyōgo",
@@ -36,7 +37,7 @@
             "id": 2,
             "first_name": "Momoko ",
             "last_name": "Matsumoto",
-            "address": "Rokutan-24-2 Shimohasumicho",
+            "address1": "Rokutan-24-2 Shimohasumicho",
             "address2": "",
             "city": "西尾市",
             "province": "Kagoshima",
@@ -47,6 +48,22 @@
             "country_code": "JP",
             "complete": "Momoko Matsumoto, Rokutan-24-2 Shimohasumicho, 西尾市, Kagoshima, Japan, 445-0004, 0563-52-2939",
             "display": "Momoko Matsumoto, Rokutan-24-2 Shimohasumicho, 西尾市, 鹿児島県, 日本, 445-0004, 0563-52-2939"
+        },
+        {
+            "id": 3,
+            "first_name": "Kira",
+            "last_name": "Rowe",
+            "address1": "Aoki-88 Miyoshicho",
+            "address2": "",
+            "city": "みよし市",
+            "province": "Akita",
+            "country": "Japan",
+            "zip": "470-0224",
+            "phone": "0561-34-7600",
+            "province_code": "JP-05",
+            "country_code": "JP",
+            "complete": "Kira Rowe, Aoki-88 Miyoshicho, みよし市, Akita, Japan, 470-0224, 0561-34-7600",
+            "display": "Kira Rowe, Aoki-88 Miyoshicho, みよし市, 秋田県, 日本, 470-0224, 0561-34-7600"
         }
     ];
 </script>
