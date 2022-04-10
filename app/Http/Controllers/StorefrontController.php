@@ -17,10 +17,7 @@ class StorefrontController extends Controller
      */
     public function products(Request $request)
     {
-        $shop = $request->get('shop', Config::get('shopify.shop'));
-
-        // The Storefront client takes in the shop url and the Storefront Access Token for that shop.
-        $storefrontClient = new Storefront($shop, config('shopify.storefront_token'));
+        $storefrontClient = $this->getStorefrontClient($request->get('shop'));
 
         // Call query and pass your query as `data`
         $products = $storefrontClient->query(
@@ -39,6 +36,71 @@ class StorefrontController extends Controller
         );
 
         return response($products->getDecodedBody()['data']['products']['edges']);
+    }
+
+    /**
+     * Creates a new checkout.
+     * https://shopify.dev/api/storefront/2022-04/mutations/checkoutCreate
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Shopify\Exception\HttpRequestException
+     * @throws \Shopify\Exception\MissingArgumentException
+     */
+    public function createCheckout(Request $request)
+    {
+        $data = $request->post();
+        $storefrontClient = $this->getStorefrontClient($request->get('shop'));
+
+        $data['lineItems'][0]['variantId'] = (int) $data['lineItems'][0]['variantId'];
+        $data['lineItems'][0]['quantity'] = (int) $data['lineItems'][0]['quantity'];
+
+        // Call query and pass your query as `data`
+        $result = $storefrontClient->query(
+            'mutation checkoutCreate($input: CheckoutCreateInput!) {
+              checkoutCreate(input: $input) {
+                checkout {
+                    id
+                    webUrl
+                    customAttributes {
+                        key
+                        value
+                    }
+                    lineItems(first: 5) {
+                       edges {
+                         node {
+                           id
+                           title
+                           quantity
+                         }
+                       }
+                    }
+                    note
+                }
+                checkoutUserErrors {
+                    code
+                    field
+                    message
+                }
+                queueToken
+              }
+            }',
+            [
+                'variables' => [
+                    'input' => $data
+                ]
+            ]
+        );
+
+        return response($result->getDecodedBody());
+    }
+
+    private function getStorefrontClient($shop = null)
+    {
+        $shop = $shop ?: Config::get('shopify.shop');
+
+        // The Storefront client takes in the shop url and the Storefront Access Token for that shop.
+        return new Storefront($shop, config('shopify.storefront_token'));
     }
 
     private function getStorefrontAccessToken()

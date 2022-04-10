@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Session;
 use App\Models\Setting;
+use App\Models\Shopify\Checkout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Shopify\Clients\Rest;
-use Shopify\Rest\Admin2022_04\Checkout;
+use Shopify\Rest\Admin2022_04\ShippingZone;
 
 class AppController extends Controller
 {
@@ -107,6 +108,43 @@ class AppController extends Controller
     }
 
     /**
+     * Create a checkout
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Shopify\Exception\RestResourceException
+     */
+    public function createCheckout(Request $request)
+    {
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $data = $request->post();
+
+        $checkout = new Checkout($this->getSession($shop));
+        $result = $checkout->insert($data);
+
+        return response($result);
+    }
+
+    /**
+     * Update a checkout
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @throws \Shopify\Exception\RestResourceException
+     */
+    public function updateCheckout(Request $request)
+    {
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $data = $request->post();
+
+        $checkout = new Checkout($this->getSession($shop), $data);
+        $checkout->save(true);
+
+        return response([
+            'token' => $checkout->token,
+            'web_url' => $checkout->web_url
+        ]);
+    }
+
+    /**
      * Retrieves a checkout
      * https://shopify.dev/api/admin-rest/2022-04/resources/checkout#get-checkouts-token
      *
@@ -118,7 +156,7 @@ class AppController extends Controller
      * @throws \Shopify\Exception\MissingArgumentException
      * @throws \Shopify\Exception\UninitializedContextException
      */
-    public function checkout(string $token, Request $request)
+    public function getCheckout(string $token, Request $request)
     {
         $shop   = $request->get('shop', Config::get('shopify.shop'));
         $client = $this->getClient($shop);
@@ -139,7 +177,7 @@ class AppController extends Controller
      */
     public function checkoutShippingRates(string $token, Request $request)
     {
-        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $shop   = $request->get('shop', Config::get('shopify.shop'));
         $result = Checkout::shipping_rates($this->getSession($shop), $token);
 
         return response($result);
@@ -151,23 +189,14 @@ class AppController extends Controller
      *
      * @param Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
-     * @throws \JsonException
-     * @throws \Psr\Http\Client\ClientExceptionInterface
-     * @throws \Shopify\Exception\MissingArgumentException
-     * @throws \Shopify\Exception\UninitializedContextException
+     * @throws \Exception
      */
     public function shippingZones(Request $request)
     {
-        $shop   = $request->get('shop', Config::get('shopify.shop'));
-        $client = $this->getClient($shop);
+        $shop = $request->get('shop', Config::get('shopify.shop'));
+        $result = ShippingZone::all($this->getSession($shop));
 
-        $response = $client->get('shipping_zones.json');
-
-        return response($response->getDecodedBody());
-
-        // Error: Current Context::$API_VERSION 'unstable' does not match resource version '2022-04'
-        // $result = ShippingZone::all($this->getSession($shop));
-        // return response($result);
+        return response($result);
     }
 
     /**
